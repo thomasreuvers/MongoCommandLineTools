@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoDBJsonImporter", "MongoDBJsonImporter\MongoDBJsonImporter.csproj", "{1FB14F6E-277E-4AC9-8744-AAA5F31F5900}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoCommandLineTools", "MongoCommandLineTools\MongoCommandLineTools.csproj", "{1FB14F6E-277E-4AC9-8744-AAA5F31F5900}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoCommandLineTools.Core", "MongoCommandLineTools.Core\MongoCommandLineTools.Core.csproj", "{CCBE0883-F2C9-477F-9BAE-87E23B8A4209}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -12,5 +14,9 @@ Global
 		{1FB14F6E-277E-4AC9-8744-AAA5F31F5900}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1FB14F6E-277E-4AC9-8744-AAA5F31F5900}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1FB14F6E-277E-4AC9-8744-AAA5F31F5900}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCBE0883-F2C9-477F-9BAE-87E23B8A4209}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCBE0883-F2C9-477F-9BAE-87E23B8A4209}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCBE0883-F2C9-477F-9BAE-87E23B8A4209}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCBE0883-F2C9-477F-9BAE-87E23B8A4209}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

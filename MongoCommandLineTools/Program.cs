@@ -1,117 +1,67 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json;
-using MongoDB.Bson;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MongoCommandLineTools.Core.Commands;
+using MongoCommandLineTools.Core.Interfaces;
+using MongoCommandLineTools.Core.Services;
 using MongoDB.Driver;
 
-namespace MongoDBJsonImporter;
+namespace MongoCommandLineTools;
 
 class Program
 {
-        private static async Task Main(string[] args)
+    static async Task Main(string[] args)
+    {
+        if (args.Length == 0)
         {
-            if (args.Length != 4)
-            {
-                Console.WriteLine("Usage: MongoDBJsonImporter <connectionString> <databaseName> <collectionName> <directoryPath>");
-                return;
-            }
-
-            var connectionString = args[0];
-            var databaseName = args[1];
-            var collectionName = args[2];
-            var directoryPath = args[3];
-
-            if (string.IsNullOrWhiteSpace(directoryPath) || !Directory.Exists(directoryPath))
-            {
-                Console.WriteLine("Invalid directory path.");
-                return;
-            }
-
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
-            var collection = database.GetCollection<BsonDocument>(collectionName);
-            var processedFilesCollection = database.GetCollection<BsonDocument>("processed_files");
-
-            var jsonFiles = Directory.GetFiles(directoryPath, "*.json");
-
-            if (jsonFiles.Length == 0)
-            {
-                Console.WriteLine("No JSON files found in the directory.");
-                return;
-            }
-
-            // Use ConcurrentQueue to handle processed files
-            var processedFiles = new ConcurrentQueue<string>();
-
-            // Use SemaphoreSlim to limit concurrent tasks
-            var semaphore = new SemaphoreSlim(Environment.ProcessorCount);
-            
-            var tasks = jsonFiles.Select(async filePath =>
-            {
-                await semaphore.WaitAsync();
-                try
-                {
-                    await ProcessJsonFileAsync(filePath, collection, processedFilesCollection, processedFiles);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
-
-            await Task.WhenAll(tasks);
+            ShowUsage();
+            return;
         }
 
-        private static async Task ProcessJsonFileAsync(string filePath, IMongoCollection<BsonDocument> collection, IMongoCollection<BsonDocument> processedFilesCollection, ConcurrentQueue<string> processedFiles)
+        var serviceProvider = ConfigureServices();
+
+        var commandName = args[0].ToLower();
+
+        var commandHandler = GetCommandHandler(serviceProvider, commandName);
+        if (commandHandler == null)
         {
-            var fileName = Path.GetFileName(filePath);
-            var filter = Builders<BsonDocument>.Filter.Eq("fileName", fileName);
-
-            // Check if the file has already been processed
-            if (await processedFilesCollection.Find(filter).AnyAsync())
-            {
-                Console.WriteLine($"File '{fileName}' has already been processed. Skipping.");
-                return;
-            }
-
-            Console.WriteLine($"Processing file: {filePath}");
-            try
-            {
-                await using var fileStream = File.OpenRead(filePath);
-                using var jsonDocument = await JsonDocument.ParseAsync(fileStream);
-
-                if (!jsonDocument.RootElement.TryGetProperty("playlists", out var playlistsElement))
-                {
-                    Console.WriteLine("No playlists found in the JSON file.");
-                    return;
-                }
-
-                var bsonDocuments = playlistsElement.EnumerateArray()
-                    .Select(ConvertToBsonDocument)
-                    .ToList();
-
-                // Use BulkWriteModel for batch inserts
-                var writeModels = bsonDocuments.Select(doc => new InsertOneModel<BsonDocument>(doc)).ToList();
-
-                // Perform bulk insert
-                await collection.BulkWriteAsync(writeModels, new BulkWriteOptions { IsOrdered = false });
-
-                Console.WriteLine($"Inserted {bsonDocuments.Count} playlists from file {Path.GetFileName(filePath)}.");
-
-                var processedFileDocument = new BsonDocument { { "fileName", fileName } };
-                await processedFilesCollection.InsertOneAsync(processedFileDocument);
-                Console.WriteLine($"File '{fileName}' marked as processed.");
-
-                processedFiles.Enqueue(fileName);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error processing file '{filePath}': {ex.Message}");
-            }
+            Console.WriteLine($"Command '{commandName}' not recognized.");
+            ShowUsage();
+            return;
         }
 
-        private static BsonDocument ConvertToBsonDocument(JsonElement element)
-        {
-            var jsonString = element.GetRawText();
-            return BsonDocument.Parse(jsonString);
-        }
+        await commandHandler.ExecuteAsync(args[1..]);
+    }
+    
+    private static void ShowUsage()
+    {
+        Console.WriteLine("Usage: MongoDBJsonImporter <command> [args]");
+        Console.WriteLine("Commands:");
+        Console.WriteLine("  import <connectionString> <databaseName> <collectionName> <directoryPath>");
+        Console.WriteLine("  benchmark <connectionString> <databaseName> <collectionName> <iterations>");
+
+        // Add more commands here
+    }
+    
+    private static IServiceProvider ConfigureServices()
+    {
+        var serviceCollection = new ServiceCollection();
+
+        // Register MongoDB client and collections
+        serviceCollection.AddSingleton<IMongoClient>(new MongoClient());
+        serviceCollection.AddSingleton<IFileProcessorService, FileProcessorService>();
+        serviceCollection.AddSingleton<IBenchmarkProcessorService, BenchmarkProcessorService>();
+
+        // Register commands
+        serviceCollection.AddSingleton<ICommandHandler, ImportCommandHandler>();
+        serviceCollection.AddSingleton<ICommandHandler, BenchmarkCommandHandler>();
+
+        return serviceCollection.BuildServiceProvider();
+    }
+
+    private static ICommandHandler? GetCommandHandler(IServiceProvider serviceProvider, string commandName)
+    {
+        var handlers = serviceProvider.GetServices<ICommandHandler>();
+        return handlers.FirstOrDefault(h =>
+            h.GetType().Name.Equals($"{commandName}CommandHandler", StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

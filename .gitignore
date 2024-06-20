@@ -3,3 +3,28 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+/files
+
+# visual studio
+.vs/
+*.suo
+*.user
+*.orig
+wwwroot/
+.idea
+
+# dependencies
+/packages
+**/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+
+# misc
+.DS_Store
