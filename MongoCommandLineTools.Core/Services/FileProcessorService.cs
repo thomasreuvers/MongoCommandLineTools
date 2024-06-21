@@ -42,6 +42,8 @@ public class FileProcessorService(IMongoClient mongoClient) : IFileProcessorServ
         });
 
         await Task.WhenAll(tasks);
+        
+        Console.WriteLine("All files imported.");
     }
 
     private async Task ProcessJsonFileAsync(string filePath, IMongoCollection<BsonDocument> collection, IMongoCollection<BsonDocument> processedFilesCollection, ConcurrentQueue<string> processedFiles)

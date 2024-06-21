@@ -35,6 +35,18 @@ public class BenchmarkProcessorService : IBenchmarkProcessorService
                 benchmarksToRun.Add(new GetPlaylistTracksByPlaylistIdBenchmark(playlistId ?? string.Empty));
                 Console.Clear();
                 break;
+            case BenchmarkConstants.InsertDocument:
+                benchmarksToRun.Add(new InsertDocumentBenchmark());
+                Console.Clear();
+                break;
+            case BenchmarkConstants.UpdateDocument:
+                benchmarksToRun.Add(new UpdateDocumentBenchmark());
+                Console.Clear();
+                break;
+            case BenchmarkConstants.DeleteDocument:
+                benchmarksToRun.Add(new DeleteDocumentBenchmark());
+                Console.Clear();
+                break;
             case BenchmarkConstants.All:
                 Console.WriteLine("Enter track name:");
                 trackName = Console.ReadLine();
