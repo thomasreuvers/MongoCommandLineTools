@@ -46,12 +46,12 @@ The benchmark command performs benchmarking operations on MongoDB.
 ```
 - `<benchmarkName>`: Name of the benchmarking operation to perform. Possible values are:
   - `All`: Perform all benchmarking operations.
-  - `GetPlaylistByNameBenchmark`: Get a playlist by name.
-  - `GetPlaylistTracksByPlaylistIdBenchmark`: Get tracks of a playlist by playlist ID.
-  - `GetTrackByNameBenchmark`: Get a track by name.
-  - `InsertDocumentBenchmark`: Insert a document.
-  - `UpdateDocumentBenchmark`: Update a document.
-  - `DeleteDocumentBenchmark`: Delete a document.
+  - `GetPlaylistByName`: Get a playlist by name.
+  - `GetPlaylistTracksByPlaylistId`: Get tracks of a playlist by playlist ID.
+  - `GetTrackByName`: Get a track by name.
+  - `InsertDocument`: Insert a document.
+  - `UpdateDocument`: Update a document.
+  - `DeleteDocument`: Delete a document.
 - `<connectionString>`: MongoDB connection string.
 - `<databaseName>`: Name of the MongoDB database.
 - `<collectionName>`: Name of the MongoDB collection to perform benchmarking on.
