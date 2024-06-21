@@ -36,9 +36,7 @@ class Program
         Console.WriteLine("Usage: MongoDBJsonImporter <command> [args]");
         Console.WriteLine("Commands:");
         Console.WriteLine("  import <connectionString> <databaseName> <collectionName> <directoryPath>");
-        Console.WriteLine("  benchmark <connectionString> <databaseName> <collectionName> <iterations>");
-
-        // Add more commands here
+        Console.WriteLine("  benchmark <benchmarkName> <connectionString> <databaseName> <collectionName> <iterations>");
     }
     
     private static IServiceProvider ConfigureServices()
